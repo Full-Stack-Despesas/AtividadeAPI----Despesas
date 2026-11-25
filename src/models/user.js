@@ -26,4 +26,11 @@ const User = sequelize.define('user', {
     }
 }, {timestamps: true, underscored: true, createdAt: 'created_at', updatedAt: 'updated_at', tableName: 'user'})
 
+// Nunca expor o hash da senha nas respostas JSON
+User.prototype.toJSON = function () {
+    const values = { ...this.get() };
+    delete values.password_hash;
+    return values;
+};
+
 module.exports = User;

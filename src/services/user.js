@@ -35,14 +35,9 @@ class UserService {
 
     }
     
-    async getAll(){        
-        const response = await UserModel.findAll({ include: [{ association: 'expenses' }] });
-        
-        if(!response){
-            throw new Error('Não existem usuários cadastrados!');
-        }
-        
-        return response
+    async getAll(){
+        // Lista apenas dados básicos; as despesas de cada usuário não são expostas aqui
+        return await UserModel.findAll({ attributes: ['id', 'name', 'email', 'created_at', 'updated_at'] });
     }
 
     async createUser(name, email, password){
@@ -53,7 +48,6 @@ class UserService {
 
         const id = crypto.randomUUID();
         const password_hash = await bcrypt.hash(password, 10);
-        console.log({name, email, password});
         return await UserModel.create({id, name, email, password_hash});
     }
 
@@ -61,7 +55,9 @@ class UserService {
         const response = await UserModel.findByPk(id, { include: [{ association: 'expenses' }] });
        
         if(!response){
-            throw new Error('Usuário não encontrado!');
+            const error = new Error('Usuário não encontrado!');
+            error.statusCode = 404;
+            throw error;
         }
 
         return response;
@@ -105,7 +101,7 @@ class UserService {
         }
         
         await user.destroy();
-        return null;
+        return true;
     }
 }
 

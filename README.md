@@ -26,6 +26,37 @@
  - volte para a raiz do projeto e rode o comando: npm start
  - pronto, o servidor já está rodando.
 
+## EXECUTANDO COM DOCKER (Parte A - Containers)
+ - Arquivos: `Dockerfile` (imagem da API), `docker-entrypoint.sh` (roda migrations + seeders ao subir) e `docker-compose.yml`.
+ - Serviços do compose:
+   - `db`: MySQL 8.4 (porta 3307 no host, para não conflitar com um MySQL local), dados persistidos no volume `db_data`.
+   - `api`: esta API Node, porta 3000. Só sobe depois que o healthcheck do `db` passa.
+ - Os dois containers ficam na rede `despesas-net`; a API acessa o banco pelo hostname `db` (DNS interno do Docker), e não por `localhost`.
+
+```bash
+docker compose up -d --build        # sobe banco + API
+docker compose ps                   # ambos "healthy"/"running"
+docker compose logs -f api          # migrations, seeders e "Servidor Rodando na porta 3000"
+```
+
+### Demonstrando a comunicação entre os containers
+```bash
+curl http://localhost:3000/api/v2/health
+# {"api":"ok","database":"ok","dbHost":"db","mysqlVersion":"8.4.x",...}
+
+docker compose exec api getent hosts db                          # nome "db" resolve para o IP do container MySQL
+docker compose exec db mysql -uapp -papp123 expenses -e "select name from category;"
+```
+
+### Testando a aplicação em execução
+```bash
+# login com usuário do seeder (senha 123456)
+curl -X POST http://localhost:3000/api/v2/auth/login -H 'Content-Type: application/json' \
+  -d '{"email":"lorenzo@email.com","password":"123456"}'
+```
+ - Depois rode o front-end (`FrontendDespesas`: `npm run dev`) e faça login com `lorenzo@email.com` / `123456`.
+ - Para parar: `docker compose down` (adicione `-v` para apagar também os dados do banco).
+
  ## TESTANDO
  - Depois efetuar a etapa acima, o servidor estará rodando na porta 3000, em http://localhost:3000.
  - O body das requisições já está pré-montado nas rotas dentro da collection do Postman, presente na pasta Postman.

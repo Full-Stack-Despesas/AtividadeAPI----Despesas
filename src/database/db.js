@@ -13,6 +13,8 @@ const sequelize = new Sequelize(process.env.MYSQL_DATABASE, process.env.MYSQL_US
     host: process.env.MYSQL_HOST,
     port: process.env. MYSQL_PORT,
     dialect: 'mysql',
+    // Azure Database for MySQL exige TLS: defina MYSQL_SSL=true para conectar nele
+    dialectOptions: process.env.MYSQL_SSL === 'true' ? { ssl: { rejectUnauthorized: true } } : {},
     logging: (msg) => countLog(msg)
 })
 

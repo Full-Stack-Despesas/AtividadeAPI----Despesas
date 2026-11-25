@@ -29,8 +29,8 @@ const Expense = sequelize.define('expense', {
         }
     },
     status: {
-        type: DataTypes.ENUM('pendente', 'pago'),
-        default: 'pendente',
+        type: DataTypes.ENUM('pendente', 'paga'),
+        defaultValue: 'pendente',
         allowNull: false
     },
     categoriaId: {

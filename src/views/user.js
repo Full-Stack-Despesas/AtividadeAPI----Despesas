@@ -11,7 +11,7 @@ class UserView {
         return await UserController.create(req, res, next);
     }
     async getById(req, res, next) {
-        return await UserController.GetById(req, res, next);
+        return await UserController.getById(req, res, next);
     }
     async update(req, res, next) {
         return await UserController.update(req, res, next);

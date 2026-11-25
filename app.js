@@ -12,6 +12,17 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Health check: comprova a comunicação API (container) -> MySQL (container)
+app.get(`${baseUrl}/health`, async (req, res) => {
+    const { sequelize } = require('./src/database/db');
+    try {
+        const [[row]] = await sequelize.query('SELECT VERSION() AS version, NOW() AS now');
+        res.json({ api: 'ok', database: 'ok', dbHost: process.env.MYSQL_HOST, mysqlVersion: row.version, dbTime: row.now });
+    } catch (e) {
+        res.status(503).json({ api: 'ok', database: 'erro', dbHost: process.env.MYSQL_HOST, error: e.message });
+    }
+});
+
 app.use(`${baseUrl}/`, AuthRoutes);
 app.use(`${baseUrl}/categories`, CategoryRoutes);
 app.use(`${baseUrl}/expenses`, ExpenseRoutes);
